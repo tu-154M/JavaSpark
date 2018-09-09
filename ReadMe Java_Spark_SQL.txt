@@ -13,6 +13,7 @@ Java-программа анализирует исходный json-файл при помощи Apache Spark, используя
 4. Spark version 2.3.1 (standalone)
    Spark context available as 'sc' (master = local[*], app id = local-1536350699117).
    Spark session available as 'spark'.
+5. IDE для разработки IntelliJ IDEA 2018.2.3 Community Edition
 
 
 Порядок запуска:
