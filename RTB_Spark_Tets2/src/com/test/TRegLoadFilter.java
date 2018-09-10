@@ -39,6 +39,7 @@ public abstract class TRegLoadFilter implements iFilter {
         if (!ObjFolder.exists()){
             ObjFolder.mkdirs();
         };
+        //event_app_loaded.show();
         event_app_loaded.write().parquet(FolderPath+SaveFolderName);
     };
 

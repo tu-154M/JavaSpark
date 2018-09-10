@@ -18,29 +18,35 @@ public class TActiveUserPrcntByParquet implements  iCalcStat {
         FilePathRegistered = inFilePathRegistered;
         FilePathAppLoaded = inFilePathAppLoaded;
         spark = inspark;
-    };
+    }
 
     public void CalcStat() {
-        int DeltaSec = 7 * 24 * 60 * 60;//переводим 7 дней в секунды, чтобы сразу вычитать секунды без их преобразования в даты
-
+        int DeltaSec = 7*24*60*60;//количество секунд в одной неделе
         Dataset<Row> DSRegistered = spark.read().parquet(FilePathRegistered);
         DSRegistered.createOrReplaceTempView("v_registered");
 
         Dataset<Row> DSAppLoaded = spark.read().parquet(FilePathAppLoaded);
         DSAppLoaded.createOrReplaceTempView("v_app_loaded");
 
-        String SQL = "SELECT load_cnt/all_cnt*100.00 prcn_active_p, load_cnt, all_cnt " +
+        String SQL = "SELECT load_cnt/reg_cnt*100.00 prcn_active_p, load_cnt, reg_cnt " +
                 "FROM ( " +
-                        "SELECT COUNT(1) all_cnt, " +
-                               "SUM(CASE WHEN l._p IS NOT NULL THEN 1 ELSE 0 END) load_cnt " +
-                          "FROM v_registered r " +
+                        "SELECT COUNT(DISTINCT r._p) reg_cnt, " +
+                               //"SUM(CASE WHEN l._p IS NOT NULL THEN 1 ELSE 0 END) load_cnt " +
+                               "COUNT(DISTINCT l._p) load_cnt " +
+                          "FROM (SELECT r0._p, " +
+                                       "unix_timestamp(next_day(from_unixtime(r0._t), 'Monday')) unix_next_mon " +
+                                  "FROM v_registered r0" +
+                               ") r " +
                           "LEFT OUTER JOIN ( " +
                                             "SELECT _p, " +
-                                                   "MIN(_t) min_load_date " +
+                                                   //"MIN(CAST(_t as bigint)) unix_min_load_date " +
+                                                    "CAST(_t as bigint) unix_min_load_date " +
                                               "FROM v_app_loaded " +
-                                             "GROUP BY _p " +
+                                             //"GROUP BY _p " +
                                           ") l " +
-                            "ON r._p = l._p AND l.min_load_date - r._t BETWEEN 0 AND " + DeltaSec +
+                            "ON r._p = l._p " +
+                           "AND l.unix_min_load_date >= r.unix_next_mon  "  +
+                           "AND l.unix_min_load_date < r.unix_next_mon + " + DeltaSec +
                 ")";
         Dataset<Row> DSCount = spark.sql(SQL);
 

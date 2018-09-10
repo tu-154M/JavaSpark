@@ -57,11 +57,14 @@ public class Main {
         //TActiveUserPrcnt ActiveUserPrcnt = new TActiveUserPrcnt(LogFile.getSpark());
         //LogFile.CalcStat(ActiveUserPrcnt);
         //System.out.println("Рассчитан процент(по json) активных пользователей: " + ActiveUserPrcnt.getResult().toString());
+        //ActiveUserPrcnt = null;
 
         TActiveUserPrcntByParquet ActiveUserPrcntByParquet = new TActiveUserPrcntByParquet(FileRegistered, FileAppLoaded, LogFile.getSpark());
         LogFile.CalcStat(ActiveUserPrcntByParquet);
         System.out.println("Рассчитан процент активных пользователей: " +
                 String.format("%.2f", ActiveUserPrcntByParquet.getResult()));
+        ActiveUserPrcntByParquet = null;//объект далее нам не нужен
+        LogFile = null;//объект далее нам не нужен
         System.out.println("Для выхода из программы нажмите любую клавишу...");
         UserInput.nextLine();
 
