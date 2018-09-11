@@ -4,22 +4,22 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 
-public class TActiveUserPrcnt implements  iCalcStat {
+public class ActiveUserPrcnt implements CalcStat {
     SparkSession spark;
-    Double Result;
-    Double getResult(){return Result;};
+    Double result;
+    Double getResult(){return result;};
 
-    public  TActiveUserPrcnt(SparkSession inspark){
-        spark = inspark;
+    public  ActiveUserPrcnt(SparkSession inSpark){
+        spark = inSpark;
     };
 
-    public void CalcStat(){
-        int DeltaSec = 7*24*60*60;//переводим 7 дней в секунды, чтобы сразу вычитать секунды без их преобразования в даты
+    public void calcStat(){
+        int deltaSec = 7*24*60*60;//переводим 7 дней в секунды, чтобы сразу вычитать секунды без их преобразования в даты
 
-        String SQL ="SELECT load_cnt/all_cnt*100.00 prcn_active_p, load_cnt, all_cnt "+
+        String sql ="SELECT load_cnt/all_cnt*100.00 prcn_active_p, load_cnt, all_cnt "+
                 "FROM (" +
                         "SELECT COUNT(1) all_cnt, " +
-                               "SUM(CASE WHEN min_load_date - reg_date BETWEEN 0 AND "+DeltaSec+" THEN 1 ELSE 0 END) load_cnt " +
+                               "SUM(CASE WHEN min_load_date - reg_date BETWEEN 0 AND "+deltaSec+" THEN 1 ELSE 0 END) load_cnt " +
                         "FROM ( "+
                                 "SELECT _p, " +
                                         "MIN(CASE WHEN _n='registered' THEN _t ELSE NULL END) reg_date, " +
@@ -30,10 +30,10 @@ public class TActiveUserPrcnt implements  iCalcStat {
                               ") WHERE reg_date IS NOT NULL" +
                 ")"
                 ;
-        Dataset<Row> DSCount = spark.sql(SQL);
+        Dataset<Row> datasetCount = spark.sql(sql);
 
-        //DSCount.show();
-        Row CurrRow =DSCount.select("prcn_active_p").collectAsList().get(0);
-        Result= (Double) CurrRow.get(0);
+        //datasetCount.show();
+        Row currRow =datasetCount.select("prcn_active_p").collectAsList().get(0);
+        result= (Double) currRow.get(0);
     };
 }

@@ -1,10 +1,10 @@
 package com.test;
 import org.apache.spark.sql.SparkSession;
 
-public class TRegFilter extends TRegLoadFilter {
+public class RegFilter extends RegLoadFilter {
 
-    public TRegFilter(String inWorkFolder, String inSaveFolderName, SparkSession inspark){
-        super(inWorkFolder, inSaveFolderName, inspark, "SELECT _t, _p, channel " +
+    public RegFilter(String inWorkFolder, String inSaveFolderName, SparkSession inSpark){
+        super(inWorkFolder, inSaveFolderName, inSpark, "SELECT _t, _p, channel " +
                 /*", CAST(_t as bigint) num_t"+
                 ", from_unixtime(_t) reg_date_time"+
                 ", CAST(date_format(from_unixtime(_t), 'EEEE') as CHAR(9)) _name_day " +

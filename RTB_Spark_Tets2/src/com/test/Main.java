@@ -8,65 +8,65 @@ public class Main {
     public static void main(String[] args) {
         // write your code here
         System.out.println("Запущено приложение по анализу логов");
-        Scanner UserInput = new Scanner(System.in);
+        Scanner userInput = new Scanner(System.in);
 
-        String CurrFolder;
-        String LoadFile;
+        String currFolder;
+        String loadFile;
         if (args.length == 0) {
             //ветка для отладки
-            CurrFolder = "c:\\RTB_Spark_Test\\";
-            LoadFile = "events.json";
+            currFolder = "c:\\RTB_Spark_Test\\";
+            loadFile = "events.json";
             System.out.println("Приложение запущено в отладочном режиме!");
         }
         else {
-            CurrFolder = args[0];
-            LoadFile = args[1];
+            currFolder = args[0];
+            loadFile = args[1];
         }
 
-        File CurrFile = new File(CurrFolder+LoadFile);
-        if ((!CurrFile.exists())||(CurrFile.isDirectory())){
-            System.out.println("Указанного файла "+ CurrFolder+LoadFile + " не существует!");
-            UserInput.nextLine();
+        File currFile = new File(currFolder+loadFile);
+        if ((!currFile.exists())||(currFile.isDirectory())){
+            System.out.println("Указанного файла "+ currFolder+loadFile + " не существует!");
+            userInput.nextLine();
             return;
         }
 
         System.out.println("Устанавливается соединение со Spark...");
-        TRegLoadLogFile LogFile = new TRegLoadLogFile(CurrFolder, LoadFile);
-        LogFile.Init();
-        System.out.println("Соединение со Spark успешно установлено. ID= " + LogFile.getSpark().toString());
+        RegLoadLogFile logFile = new RegLoadLogFile(currFolder, loadFile);
+        logFile.init();
+        System.out.println("Соединение со Spark успешно установлено. ID= " + logFile.getSpark().toString());
 
-        String FolderEvents = LogFile.getWorkFolder() +
-                LogFile.getWorkFile().replace(".", "_") +
+        String folderEvents = logFile.getWorkFolder() +
+                logFile.getWorkFile().replace(".", "_") +
                 "\\events\\";
 
         System.out.println("Идет выборка данных о зарегистрированных пользователях...");
-        String FileRegistered = FolderEvents + "registered";
-        TRegFilter RegFilter = new TRegFilter(FolderEvents, "registered", LogFile.getSpark());
-        LogFile.Filter(RegFilter);
-        RegFilter = null;//объект далее нам не нужен
+        String fileRegistered = folderEvents + "registered";
+        RegFilter currRegFilter = new RegFilter(folderEvents, "registered", logFile.getSpark());
+        logFile.filterAndSave(currRegFilter);
+        currRegFilter = null;//объект далее нам не нужен
         System.out.println("Данные о зарегистрированных пользователях успешно выбраны");
 
         System.out.println("Идет выборка данных о запусках приложения...");
-        String FileAppLoaded = FolderEvents+ "app_loaded";
-        TLoadFilter LoadFilter = new TLoadFilter(FolderEvents, "app_loaded", LogFile.getSpark());
-        LogFile.Filter(LoadFilter);
-        LoadFilter = null;//объект далее нам не нужен
+        String fileAppLoaded = folderEvents+ "app_loaded";
+        LoadFilter currLoadFilter = new LoadFilter(folderEvents, "app_loaded", logFile.getSpark());
+        logFile.filterAndSave(currLoadFilter);
+        currLoadFilter = null;//объект далее нам не нужен
         System.out.println("Данные о запусках приложения успешно выбраны");
 
         //System.out.println("Идет расчет процента активных пользователей...");
-        //TActiveUserPrcnt ActiveUserPrcnt = new TActiveUserPrcnt(LogFile.getSpark());
-        //LogFile.CalcStat(ActiveUserPrcnt);
-        //System.out.println("Рассчитан процент(по json) активных пользователей: " + ActiveUserPrcnt.getResult().toString());
-        //ActiveUserPrcnt = null;
+        //ActiveUserPrcnt CurrActiveUserPrcnt = new ActiveUserPrcnt(logFile.getSpark());
+        //logFile.CalcStat(CurrActiveUserPrcnt);
+        //System.out.println("Рассчитан процент(по json) активных пользователей: " + CurrActiveUserPrcnt.getResult().toString());
+        //CurrActiveUserPrcnt = null;
 
-        TActiveUserPrcntByParquet ActiveUserPrcntByParquet = new TActiveUserPrcntByParquet(FileRegistered, FileAppLoaded, LogFile.getSpark());
-        LogFile.CalcStat(ActiveUserPrcntByParquet);
+        ActiveUserPrcntByParquet currActiveUserPrcntByParquet = new ActiveUserPrcntByParquet(fileRegistered, fileAppLoaded, logFile.getSpark());
+        logFile.calcStat(currActiveUserPrcntByParquet);
         System.out.println("Рассчитан процент активных пользователей: " +
-                String.format("%.2f", ActiveUserPrcntByParquet.getResult()));
-        ActiveUserPrcntByParquet = null;//объект далее нам не нужен
-        LogFile = null;//объект далее нам не нужен
+                String.format("%.2f", currActiveUserPrcntByParquet.getResult()));
+        currActiveUserPrcntByParquet = null;//объект далее нам не нужен
+        logFile = null;//объект далее нам не нужен
         System.out.println("Для выхода из программы нажмите любую клавишу...");
-        UserInput.nextLine();
+        userInput.nextLine();
 
     }
 
